@@ -7,17 +7,17 @@
 #include <DallasTemperature.h>
 
 /**
- * 
- * Libraries:
- * https://github.com/candale/esp_mqtt_arduino_wrapper
- * https://github.com/sparkfun/TSL2561_Luminosity_Sensor_BOB/tree/master/Libraries/Arduino
- * https://github.com/PaulStoffregen/OneWire
- * https://github.com/milesburton/Arduino-Temperature-Control-Library
- */
+
+   Libraries:
+   https://github.com/candale/esp_mqtt_arduino_wrapper
+   https://github.com/sparkfun/TSL2561_Luminosity_Sensor_BOB/tree/master/Libraries/Arduino
+   https://github.com/PaulStoffregen/OneWire
+   https://github.com/milesburton/Arduino-Temperature-Control-Library
+*/
 
 
 extern "C" {
-  #include "user_interface.h"
+#include "user_interface.h"
 }
 
 #define ONE_WIRE_BUS 2  // DS18B20 pin
@@ -26,8 +26,8 @@ extern "C" {
 #define CALLABLE 2
 #define ROLE SENSOR
 
-const char* ssid = "Can't Touch This";
-const char* pass = "getyourownwifi";
+const char* ssid = "SpyhceNew";
+const char* pass = "Slayer!@#4";
 
 
 os_timer_t statsTimer;
@@ -49,51 +49,61 @@ void log(String& buf) {
 
 class MyClient: public MQTTClient
 {
-  using MQTTClient::MQTTClient;
+    using MQTTClient::MQTTClient;
 
-  void set(char* payload) {
+    void set(char* payload) {
 
-  }
-
-  void onData(String& topic, String& payload) {
-    char topic_[100];
-    char action[30];
-    char* tok;
-    
-    strncpy(topic_, topic.c_str(), 100);
-    tok = strtok(topic_, "/");
-    tok = strtok(NULL, "/");
-
-    if(strcmp(tok, "buzz") == 0) {
-      log("Got buzz");
-      analogWrite(D6, 800);
-      os_timer_arm(&disableBuzz, 400, false); 
     }
-  }
 
-  void onConnected() {
-    log("Connected to MQTT broker");
-    log("Subscribing to topics");
-    subscribe("device1/#", 1); 
-  }
+    void onData(String& topic, String& payload) {
+      char topic_[100];
+      char action[30];
+      char* tok;
+      Serial.print("Got topic: ");
+      Serial.println(topic);
+
+      Serial.print("Got payload: ");
+      Serial.println(payload);
+
+      strncpy(topic_, topic.c_str(), 100);
+      tok = strtok(topic_, "/");
+      tok = strtok(NULL, "/");
+      tok = strtok(NULL, "/");
+
+      if (strcmp(tok, "buzz") == 0) {
+        log("Got buzz");
+        int freq = atoi(payload.c_str());
+        if (freq <= 0 || freq > 1023) {
+          return;
+        }
+        analogWrite(D6, freq);
+        os_timer_arm(&disableBuzz, 400, false);
+      }
+    }
+
+    void onConnected() {
+      log("Connected to MQTT broker");
+      log("Subscribing to topics");
+      subscribe("device/c/#", 1);
+    }
 };
 
 MyClient* client;
 
- 
+
 
 void setupWifi() {
   log("Connecting to WiFI...");
-  
+
   WiFi.begin(ssid, pass);
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.print(".");
   }
   Serial.println("");
-  
+
   WiFi.setAutoConnect(true);
   WiFi.setAutoReconnect(true);
-  
+
   log("Connected to wifi");
 }
 
@@ -103,36 +113,36 @@ void setupMqtt() {
 }
 
 double getLum() {
-   unsigned int data0, data1;
+  unsigned int data0, data1;
 
-    if (light.getData(data0, data1))
-    {
-      double lux;    // Resulting lux value
-      boolean good;  // True if neither sensor is saturated
-      good = light.getLux(gain, ms, data0, data1, lux);
+  if (light.getData(data0, data1))
+  {
+    double lux;    // Resulting lux value
+    boolean good;  // True if neither sensor is saturated
+    good = light.getLux(gain, ms, data0, data1, lux);
 
-      return lux;
-    }
-    else
-    {
-      Serial.println("Error on getting light");
-    }
+    return lux;
+  }
+  else
+  {
+    Serial.println("Error on getting light");
+  }
 }
 
 void showStats(void* arg) {
   char strTemp[20];
   char strLum[20];
-  
-  DS18B20.requestTemperatures(); 
+
+  DS18B20.requestTemperatures();
   float temp = DS18B20.getTempCByIndex(0);
   dtostrf(temp, 2, 2, strTemp);
-  client->publish("devices/temp", strTemp, strlen(strTemp), 1, 1);
+  client->publish("device/temp", strTemp, strlen(strTemp), 1, 1);
   Serial.print("TEMP: ");
   Serial.println(temp);
 
   double lum = getLum();
   dtostrf(lum, 2, 2, strLum);
-  client->publish("devices/lum", strLum, strlen(strLum), 1, 1);
+  client->publish("device/lum", strLum, strlen(strLum), 1, 1);
   Serial.print("LUX: ");
   Serial.println(strLum);
 }
@@ -144,8 +154,8 @@ void unBuzz(void* arg) {
 
 
 void user_init(void) {
-   os_timer_setfn(&statsTimer, showStats, NULL);
-   os_timer_setfn(&disableBuzz, unBuzz, NULL);
+  os_timer_setfn(&statsTimer, showStats, NULL);
+  os_timer_setfn(&disableBuzz, unBuzz, NULL);
 }
 
 void setupLuminositySensor() {
@@ -170,7 +180,7 @@ void setup() {
   setupWifi();
   setupMqtt();
   setupLuminositySensor();
-  
+
   user_init();
   os_timer_arm(&statsTimer, 1000, true);
 
