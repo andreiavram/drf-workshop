@@ -30,6 +30,7 @@ class Operation(object):
         (NE, 'not equal')
     )
 
+    @staticmethod
     def eval_for_op(op, a, b):
         mapping = {'<': lt, '<=': le, '>': gt, '>=': ge, '=': eq, '!=': ne}
 

@@ -18,6 +18,13 @@ class DeviceController(object):
         self.port = port
         self.messages = {}
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()
+
     def start(self):
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message

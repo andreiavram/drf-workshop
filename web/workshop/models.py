@@ -14,22 +14,28 @@ class Device(models.Model):
     direction = models.IntegerField(choices=MessageDirection.DEVICE_DIRECTIONS)
     description = models.TextField(null=True, blank=True)
 
-    def read(self):
-        if self.direction == self.DEVICE_WRITE:
+    def read(self, client=None):
+        if self.direction == MessageDirection.DEVICE_WRITE:
             raise ValueError('This device is only for writing')
 
-        with DeviceController(self.name) as device:
-            return device.read(self.topic)
+        if client is not None:
+            return client.read(self.topic)
 
-    def write(self, data):
+        with DeviceController(self.name) as client:
+            return client.read(self.topic)
+
+    def write(self, data, client=None):
         if not all([value.isdigit() for value in data.split(',')]):
             raise ValueError('Data may be only a CSV list of numbers')
 
-        if self.direction == self.DEVICE_READ:
+        if self.direction == MessageDirection.DEVICE_READ:
             raise ValueError('This device is only for reading')
 
-        with DeviceController(self.name) as device:
-            device.write(self.topic, data)
+        if client is not None:
+            client.send(self.topic, data)
+        else:
+            with DeviceController(self.name) as client:
+                client.send(self.topic, data)
 
     def is_alive(self) -> bool:
         #   this simulates an expensive get status operation :)
@@ -61,4 +67,4 @@ class Rule(models.Model):
     ruleset = models.ForeignKey(RuleSet, related_name='rules')
     source_device = models.ForeignKey(Device)
     ref_value = models.FloatField()
-    operator = models.SmallIntegerField(choices=Operation.OPERATIONS)
+    operator = models.CharField(max_length=10, choices=Operation.OPERATIONS)
