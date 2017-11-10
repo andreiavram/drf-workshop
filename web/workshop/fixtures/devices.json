@@ -1,0 +1,52 @@
+[
+{
+    "model": "workshop.device",
+    "pk": 1,
+    "fields": {
+        "name": "temperature_sensor",
+        "topic": "temp",
+        "direction": 1,
+        "description": "A DSB18B20 temperature sensor that reports a value, a single float value, once a second."
+    }
+},
+{
+    "model": "workshop.device",
+    "pk": 2,
+    "fields": {
+        "name": "luminosity_sensor",
+        "topic": "lum",
+        "direction": 1,
+        "description": "A TSL2561 luminosity sensor that reports the luminosity, a single float value, once per second."
+    }
+},
+{
+    "model": "workshop.device",
+    "pk": 3,
+    "fields": {
+        "name": "buzzer",
+        "topic": "buzz",
+        "direction": 0,
+        "description": "A buzzer that receives the frequency of the sound and the time it should be on.\r\n\r\nPayload: \"X,Y\"\r\n- X: the frequency (value: 1-1023)\r\n-Y: how much time, in ms, the buzzer should be on (value: 1-1000)"
+    }
+},
+{
+    "model": "workshop.device",
+    "pk": 4,
+    "fields": {
+        "name": "led_strip",
+        "topic": "led",
+        "direction": 0,
+        "description": "An RGB LED strip for which any led can be configured individually. \r\n\r\nPayload: \"X,R,G,B\":\r\n- X: the LED number onto which the action is reflected (value: 0-143)\r\n- R: the brightness of the RED LED\r\n- G: the brightness of the GREN LED\r\n- B: the brightness of the BLUE LED"
+    }
+},
+{
+    "model": "workshop.device",
+    "pk": 5,
+    "fields": {
+        "name": "servo_motor",
+        "topic": "servo",
+        "direction": 0,
+        "description": "A servo motor that takes as input the angle at which it should position itself.\r\n\r\nPayload: \"X\"\r\n- X: the angle at which the servo will position itself (value: 0-180)"
+    }
+}
+]
