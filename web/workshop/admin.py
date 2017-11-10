@@ -5,8 +5,7 @@ from workshop.models import Device
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    class Meta:
-        model = Device
+    list_display = ["name", "channel"]
 
 
 admin.register(DeviceAdmin, Device)

@@ -19,5 +19,8 @@ from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^docs/', include_docs_urls(title='Control'))
+   url(r'^docs/', include_docs_urls(title='Your API',
+                                    authentication_classes=[],
+                                    permission_classes=[])),
+
 ]
