@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class Device(models.Model):
     DEVICE_READ = 1
     DEVICE_WRITE = 0
