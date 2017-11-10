@@ -37,7 +37,7 @@ class DeviceController(object):
         self.client.subscribe('device/#')
 
     def send(self, device, payload):
-        self.client.publish('device/c/{}'.format(device), payload)
+        self.client.publish('device/c/{}'.format(device), payload, qos=1)
 
     def read(self, device, retries=3, delay=0.5):
         counter = 0

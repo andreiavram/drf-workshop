@@ -5,6 +5,7 @@
 #include <SparkFunTSL2561.h>
 #include <Wire.h>
 #include <DallasTemperature.h>
+#include <Adafruit_NeoPixel.h>
 
 /**
 
@@ -17,24 +18,27 @@
 
 
 extern "C" {
-#include "user_interface.h"
+  #include "user_interface.h"
 }
 
 #define ONE_WIRE_BUS 2  // DS18B20 pin
+#define NUMPIXELS 144
 
-#define SENSOR 1
-#define CALLABLE 2
-#define ROLE SENSOR
+#define LED_BUZZ 1
+#define TEMP_LUM_SERVO 2
+#define ROLE TEMP_LUM_SERVO
 
-const char* ssid = "SpyhceNew";
-const char* pass = "Slayer!@#4";
+const char* ssid = "RAMADACLUJ";
+const char* pass = "hotel12345";
 
 
 os_timer_t statsTimer;
 os_timer_t disableBuzz;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, D7, NEO_GRB + NEO_KHZ800);
 SFE_TSL2561 light;
+
 boolean gain;
 unsigned int ms;
 
@@ -57,8 +61,10 @@ class MyClient: public MQTTClient
 
     void onData(String& topic, String& payload) {
       char topic_[100];
+      char payload_[200];
       char action[30];
       char* tok;
+
       Serial.print("Got topic: ");
       Serial.println(topic);
 
@@ -66,25 +72,102 @@ class MyClient: public MQTTClient
       Serial.println(payload);
 
       strncpy(topic_, topic.c_str(), 100);
+      strncpy(payload_, payload.c_str(), 200);
+
       tok = strtok(topic_, "/");
       tok = strtok(NULL, "/");
       tok = strtok(NULL, "/");
 
       if (strcmp(tok, "buzz") == 0) {
         log("Got buzz");
-        int freq = atoi(payload.c_str());
+        int freq, duration;
+
+        tok = strtok(payload_, ",");
+        freq = atoi(tok);
+        tok = strtok(NULL, ",");
+        duration = atoi(tok);
+
         if (freq <= 0 || freq > 1023) {
+          log("bad freq");
+          return;
+        }
+
+        if(duration < 0 || duration > 1000) {
+          log("bad duration");
           return;
         }
         analogWrite(D6, freq);
-        os_timer_arm(&disableBuzz, 400, false);
+        os_timer_arm(&disableBuzz, duration, false);
+      }
+
+      if(strcmp(tok, "led") == 0) {
+        log("Got led");
+        int led, r, g, b;
+        tok = strtok(payload_, ",");
+        led = atoi(tok);
+        if(led < 0 || led > NUMPIXELS) {
+          log("bad led");
+          return;
+        }
+
+        tok = strtok(NULL, ",");
+        r = atoi(tok);
+        if(r < 0 || r > 254) {
+          log("bad R");
+          return;
+        }
+
+        tok = strtok(NULL, ",");
+        g = atoi(tok);
+        if(g < 0 || g > 254) {
+          log("bad G");
+          return;
+        }
+
+        tok = strtok(NULL, ",");
+        b = atoi(tok);
+        if(b < 0 || b > 254) {
+          log("bad G");
+          return;
+        }
+
+        pixels.setPixelColor(led, pixels.Color(r, g, b));
+        pixels.show();
+      }
+
+      if(strcmp(tok, "servo") == 0) {
+        log("Got servo");
+        int angle = atoi(payload_);
+        if(angle < 0 || angle > 180) {
+          log("bad angle");
+          return;
+        }
+
+        // specific for the servos used
+        int min_ = 85, max_ = 466;
+
+        int pwmVal;
+        if(angle == 0) {
+          pwmVal = min_;
+        } else {
+          pwmVal = min_ + (max_ - min_) / 180 * angle;
+        }
+
+        Serial.print("Writing to servo: ");
+        Serial.println(pwmVal);
+        analogWrite(D5, pwmVal);
       }
     }
 
     void onConnected() {
       log("Connected to MQTT broker");
       log("Subscribing to topics");
-      subscribe("device/c/#", 1);
+      if(ROLE == LED_BUZZ) {
+        subscribe("device/c/led", 1);
+        subscribe("device/c/buzz", 1);
+      } else if(ROLE == TEMP_LUM_SERVO) {
+        subscribe("device/c/servo", 1);
+      }
     }
 };
 
@@ -108,7 +191,11 @@ void setupWifi() {
 }
 
 void setupMqtt() {
-  client = new MyClient("device", "212.47.229.77", "", "", 1884, 60);
+  if(ROLE == LED_BUZZ) {
+    client = new MyClient("led_buzz", "212.47.229.77", "", "", 1884, 60); 
+  } else if(ROLE == TEMP_LUM_SERVO) {
+    client = new MyClient("temp_lum_servo", "212.47.229.77", "", "", 1884, 60); 
+  }
   client->connect();
 }
 
@@ -170,22 +257,32 @@ void setupLuminositySensor() {
   }
 }
 
+void initAll() {
+  setupWifi();
+  setupMqtt();
+  user_init();
+
+  if(ROLE == LED_BUZZ) {
+    pinMode(D6, OUTPUT);
+    pixels.begin();
+  }
+
+  if(ROLE == TEMP_LUM_SERVO) {
+    analogWriteFreq(200);
+    os_timer_arm(&statsTimer, 1000, true);
+    setupLuminositySensor();
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println();
 
-  pinMode(D6, OUTPUT);
-  analogWriteFreq(200);
-
-  setupWifi();
-  setupMqtt();
-  setupLuminositySensor();
-
-  user_init();
-  os_timer_arm(&statsTimer, 1000, true);
-
+  initAll();
 }
 
 void loop() {
 
 }
+
+
