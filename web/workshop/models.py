@@ -7,6 +7,10 @@ from device_client import DeviceController
 from workshop.constants import MessageDirection, Operation
 
 
+class DeviceException(Exception):
+    pass
+
+
 class Device(models.Model):
 
     name = models.CharField(max_length=255)
@@ -30,6 +34,9 @@ class Device(models.Model):
 
         if self.direction == MessageDirection.DEVICE_READ:
             raise ValueError('This device is only for reading')
+
+        # if random.randint(0, 9) == 4:
+        #     raise DeviceException("Hardware error, could not write to the device")
 
         if client is not None:
             client.send(self.topic, data)
