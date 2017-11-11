@@ -52,7 +52,7 @@ class MessageHistory(models.Model):
     device = models.ForeignKey(Device)
     value = models.CharField(max_length=100)
     timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(get_user_model())
+    user = models.ForeignKey(get_user_model(), null=True)
 
 
 class RuleSet(models.Model):
