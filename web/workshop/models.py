@@ -59,6 +59,7 @@ class RuleSet(models.Model):
 
     target_device = models.ForeignKey(Device)
     payload = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return 'Device: {}. Payload: {}'.format(

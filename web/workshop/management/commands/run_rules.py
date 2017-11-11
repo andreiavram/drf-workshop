@@ -32,6 +32,9 @@ class Command(BaseCommand):
                 past_time = 0
 
             for rule_set in rule_sets:
+                if not rule_set.is_active:
+                    continue
+
                 is_met = all([
                     self.evaluate_rule(rule) for rule in rule_set.rules.all()
                 ])
