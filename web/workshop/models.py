@@ -2,13 +2,10 @@ import time
 import random
 
 from django.db import models
+from django.contrib.auth import get_user_model
+
 from device_client import DeviceController
-
 from workshop.constants import MessageDirection, Operation
-
-
-class DeviceException(Exception):
-    pass
 
 
 class Device(models.Model):
@@ -35,9 +32,6 @@ class Device(models.Model):
         if self.direction == MessageDirection.DEVICE_READ:
             raise ValueError('This device is only for reading')
 
-        # if random.randint(0, 9) == 4:
-        #     raise DeviceException("Hardware error, could not write to the device")
-
         if client is not None:
             client.send(self.topic, data)
         else:
@@ -58,13 +52,13 @@ class MessageHistory(models.Model):
     device = models.ForeignKey(Device)
     value = models.CharField(max_length=100)
     timestamp = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(get_user_model())
 
 
 class RuleSet(models.Model):
 
     target_device = models.ForeignKey(Device)
     payload = models.CharField(max_length=100)
-    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return 'Device: {}. Payload: {}'.format(
