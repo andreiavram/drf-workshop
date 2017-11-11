@@ -130,3 +130,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+LEDSTRIP_MIN = 0
+LEDSTRIP_MAX = 143
