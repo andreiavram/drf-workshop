@@ -50,6 +50,7 @@ class MessageHistory(models.Model):
 
     device = models.ForeignKey(Device)
     value = models.CharField(max_length=100)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 
 class RuleSet(models.Model):
