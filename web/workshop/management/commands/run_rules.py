@@ -24,11 +24,11 @@ class Command(BaseCommand):
 
     def run(self, interval=1):
         past_time = 0
-        rule_sets = RuleSet.objects.all()
+        rule_sets = RuleSet.objects.filter(is_active=True)
         while True:
             if past_time >= 5:
                 self.stdout.write('Loading rule sets again ...')
-                rule_sets = RuleSet.objects.all()
+                rule_sets = RuleSet.objects.filter(is_active=True)
                 past_time = 0
 
             for rule_set in rule_sets:
