@@ -54,6 +54,31 @@ void log(String& buf) {
   Serial.println(buf);
 }
 
+
+void all_pixels_to(int r, int b, int g) {
+  for(int led_number = 0; led_number < NUMPIXELS; led_number++) {
+     pixels.setPixelColor(led_number, pixels.Color(r, g, b));
+  }
+  pixels.show();
+}
+
+void pixels_range_to(int start, int end, int r, int b, int g) {
+  if(start < 0) {
+    log("bad start");
+    return;
+  }
+
+  if(end > NUMPIXELS) {
+    log("bad end");
+    return;
+  }
+
+  for(int led_number = start; led_number <= end; led_number++) {
+    pixels.setPixelColor(led_number, pixels.Color(r, g, b));
+  }
+  pixels.show();
+}
+
 class MyClient: public MQTTClient
 {
     using MQTTClient::MQTTClient;
@@ -106,37 +131,77 @@ class MyClient: public MQTTClient
       if(strcmp(tok, "led") == 0) {
         log("Got led");
         int led, r, g, b;
+        bool is_range = false;
+        char range[20];
         tok = strtok(payload_, ",");
-        led = atoi(tok);
-        if(led < 0 || led > NUMPIXELS) {
-          log("bad led");
-          return;
+        for(int i = 0; i < strlen(tok); i++) {
+          if(tok[i] == '|') {
+            is_range = true;
+          }
+        }
+        if(is_range) {
+          strcpy(range, tok);
+        } else if(strcmp(tok, "all") == 0) {
+          led = -1;
+        } else if(strcmp(tok, "all_blink") == 0) {
+          led = -2;
+        } else {
+          led = atoi(tok);
+          if(led < 0 || led > NUMPIXELS) {
+            log("bad led");
+            return;
+          }
         }
 
         tok = strtok(NULL, ",");
         r = atoi(tok);
-        if(r < 0 || r > 254) {
+        if(r < 0 || r > 255) {
           log("bad R");
           return;
         }
 
         tok = strtok(NULL, ",");
         g = atoi(tok);
-        if(g < 0 || g > 254) {
+        if(g < 0 || g > 255) {
           log("bad G");
           return;
         }
 
         tok = strtok(NULL, ",");
         b = atoi(tok);
-        if(b < 0 || b > 254) {
+        if(b < 0 || b > 255) {
           log("bad G");
           return;
         }
 
+        if(is_range) {
+          tok = strtok(range, "|");
+          int start = atoi(tok);
+          tok = strtok(NULL, "|");
+          int end = atoi(tok);
+
+          for(int i = 0; i < 3; i ++) {
+            pixels_range_to(start, end, r, g, b);
+            delayMicroseconds(350000);
+            all_pixels_to(0, 0, 0);
+            delayMicroseconds(200000);
+          }
+          
+        } else if(led == -1) {
+          all_pixels_to(r, g, b);
+        } else if (led == -2) {
+          for(int i = 0; i < 3; i ++) {
+            all_pixels_to(r, g, b);
+            delayMicroseconds(350000);
+            all_pixels_to(0, 0, 0);
+            delayMicroseconds(200000);
+          }
+        } else {
+          pixels.setPixelColor(led, pixels.Color(r, g, b));
+          pixels.show();
+        }
+        
         log("Writing to pixels");
-        pixels.setPixelColor(led, pixels.Color(r, g, b));
-        pixels.show();
       }
 
       if(strcmp(tok, "servo") == 0) {
@@ -200,9 +265,9 @@ void setupWifi() {
 
 void setupMqtt() {
   if(ROLE == LED_BUZZ) {
-    client = new MyClient("client_id", "host", "user", "pass", 1883, 60);
+    client = new MyClient("led_buzz", "212.47.229.77", "led_buzz", "coolpassword", 1884, 60);
   } else if(ROLE == TEMP_LUM_SERVO) {
-    client = new MyClient("client_id", "host", "user", "pass", 1883, 60);
+    client = new MyClient("temp_lum_servo", "212.47.229.77", "", "", 1884, 60);
   }
   client->connect();
 }

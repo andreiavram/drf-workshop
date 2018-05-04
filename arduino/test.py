@@ -14,7 +14,7 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.username_pw_set('user', 'pass')
-client.connect("host", 1883, 60)
+# client.username_pw_set('workshop', 'coolpassword')
+client.connect("212.47.229.77", 1884, 60)
 
 client.loop_start()
