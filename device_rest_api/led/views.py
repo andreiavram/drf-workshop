@@ -22,7 +22,7 @@ class LedOpAPIView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         try:
-            super(LedOpAPIView, self).update(self.request, *args, **kwargs)
+            return super(LedOpAPIView, self).update(self.request, *args, **kwargs)
         except ValidationError:
             username_number = int(self.request.user.username.split('-')[-1])
 
