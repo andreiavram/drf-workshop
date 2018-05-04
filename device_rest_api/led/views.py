@@ -34,6 +34,8 @@ class LedOpAPIView(generics.UpdateAPIView):
             with DeviceController(self.request.user.username) as ctl:
                 ctl.send('led', payload)
 
+            raise
+
     def perform_update(self, serializer):
         with DeviceController(self.request.user.username) as ctl:
             payload = '{led},{red},{green},{blue}'.format(
