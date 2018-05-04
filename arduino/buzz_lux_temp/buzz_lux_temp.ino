@@ -14,6 +14,7 @@
    https://github.com/sparkfun/TSL2561_Luminosity_Sensor_BOB/tree/master/Libraries/Arduino
    https://github.com/PaulStoffregen/OneWire
    https://github.com/milesburton/Arduino-Temperature-Control-Library
+   https://github.com/adafruit/Adafruit_NeoPixel
 */
 
 
@@ -26,18 +27,20 @@ extern "C" {
 
 #define LED_BUZZ 1
 #define TEMP_LUM_SERVO 2
-#define ROLE TEMP_LUM_SERVO
+#define ROLE LED_BUZZ
 
-const char* ssid = "RAMADACLUJ";
-const char* pass = "hotel12345";
+const char* ssid = "lasurub";
+const char* pass = "Slayer!@#4";
 
 
 os_timer_t statsTimer;
 os_timer_t disableBuzz;
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature DS18B20(&oneWire);
+
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, D7, NEO_GRB + NEO_KHZ800);
 SFE_TSL2561 light;
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature DS18B20(&oneWire);
 
 boolean gain;
 unsigned int ms;
@@ -131,6 +134,7 @@ class MyClient: public MQTTClient
           return;
         }
 
+        log("Writing to pixels");
         pixels.setPixelColor(led, pixels.Color(r, g, b));
         pixels.show();
       }
@@ -168,6 +172,8 @@ class MyClient: public MQTTClient
       } else if(ROLE == TEMP_LUM_SERVO) {
         subscribe("device/c/servo", 1);
       }
+
+      log("Done MQTT init");
     }
 };
 
@@ -181,20 +187,22 @@ void setupWifi() {
   WiFi.begin(ssid, pass);
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.print(".");
+    delay(200);
   }
   Serial.println("");
+  
+  log("Connected to wifi");
 
   WiFi.setAutoConnect(true);
   WiFi.setAutoReconnect(true);
 
-  log("Connected to wifi");
 }
 
 void setupMqtt() {
   if(ROLE == LED_BUZZ) {
-    client = new MyClient("led_buzz", "212.47.229.77", "", "", 1884, 60); 
+    client = new MyClient("client_id", "host", "user", "pass", 1883, 60);
   } else if(ROLE == TEMP_LUM_SERVO) {
-    client = new MyClient("temp_lum_servo", "212.47.229.77", "", "", 1884, 60); 
+    client = new MyClient("client_id", "host", "user", "pass", 1883, 60);
   }
   client->connect();
 }
@@ -219,7 +227,7 @@ double getLum() {
 void showStats(void* arg) {
   char strTemp[20];
   char strLum[20];
-
+  
   DS18B20.requestTemperatures();
   float temp = DS18B20.getTempCByIndex(0);
   dtostrf(temp, 2, 2, strTemp);
@@ -265,6 +273,7 @@ void initAll() {
   if(ROLE == LED_BUZZ) {
     pinMode(D6, OUTPUT);
     pixels.begin();
+    log("Done led init");
   }
 
   if(ROLE == TEMP_LUM_SERVO) {
@@ -272,6 +281,7 @@ void initAll() {
     os_timer_arm(&statsTimer, 1000, true);
     setupLuminositySensor();
   }
+  log("Done all init");
 }
 
 void setup() {
