@@ -79,6 +79,7 @@ void pixels_range_to(int start, int end, int r, int b, int g) {
   pixels.show();
 }
 
+
 class MyClient: public MQTTClient
 {
     using MQTTClient::MQTTClient;
@@ -186,7 +187,7 @@ class MyClient: public MQTTClient
             all_pixels_to(0, 0, 0);
             delayMicroseconds(200000);
           }
-          
+
         } else if(led == -1) {
           all_pixels_to(r, g, b);
         } else if (led == -2) {
@@ -200,7 +201,7 @@ class MyClient: public MQTTClient
           pixels.setPixelColor(led, pixels.Color(r, g, b));
           pixels.show();
         }
-        
+
         log("Writing to pixels");
       }
 
@@ -255,7 +256,7 @@ void setupWifi() {
     delay(200);
   }
   Serial.println("");
-  
+
   log("Connected to wifi");
 
   WiFi.setAutoConnect(true);
@@ -292,7 +293,7 @@ double getLum() {
 void showStats(void* arg) {
   char strTemp[20];
   char strLum[20];
-  
+
   DS18B20.requestTemperatures();
   float temp = DS18B20.getTempCByIndex(0);
   dtostrf(temp, 2, 2, strTemp);

@@ -7,5 +7,5 @@ from rest_framework.authtoken import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^auth-token', views.obtain_auth_token),
-    url(r'^led/', include('led.urls')),
+    url(r'^device/', include('led.urls')),
 ]

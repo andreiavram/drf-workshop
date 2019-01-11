@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework.exceptions import ParseError, ValidationError
@@ -21,6 +22,13 @@ class LedOpAPIView(generics.UpdateAPIView):
         return
 
     def update(self, request, *args, **kwargs):
+        """
+        CURL EXAMPLE:
+        curl -X PUT 'username-<id>:password@localhost:8000/device/led/3' -d '{"red": 10, "blue": 10, "green": 240}' -H 'Content-Type:application/json'
+        When the request is wrong, all the LEDs of the user get lit.
+        When the user requests some other LED which is not his/hers, all the LEDs
+        get red.
+        """
         try:
             return super(LedOpAPIView, self).update(self.request, *args, **kwargs)
         except ValidationError:
@@ -42,3 +50,17 @@ class LedOpAPIView(generics.UpdateAPIView):
                 led=self.kwargs['led_number'], **serializer.validated_data)
 
             ctl.send('led', payload)
+
+
+class MotorOpAPIView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request):
+        """
+        curl -X PUT 'username-<id>:password@localhost:8000/device/motor/'  -H 'Content-Type:application/json'
+        """
+        with DeviceController(self.request.user.username) as ctl:
+            ctl.send('motor', '')
+
+        return Response({'action': 'ok'})
