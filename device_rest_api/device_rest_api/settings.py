@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+LEDS_PER_USER = 9
 # Application definition
 
 INSTALLED_APPS = [
