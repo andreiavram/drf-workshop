@@ -25,7 +25,7 @@ SECRET_KEY = '+(#fv0u%p98ykd&af*a!j02_ggwl@j*$=!nvfk-qf4l$6d9sso'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['d.acandale.com']
 
 LEDS_PER_USER = 9
 # Application definition
