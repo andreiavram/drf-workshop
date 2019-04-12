@@ -133,3 +133,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
+
+
+LEDS_PER_USER = 12
