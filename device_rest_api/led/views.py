@@ -1,3 +1,4 @@
+import time
 from django.shortcuts import render
 
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from device_client import DeviceController
 
 from led.serializers import LEDRGBSerializer
 from led.permissions import AllowedOnLed
+from led.utils import get_user_led_bounds
 
 
 class LedOpAPIView(generics.UpdateAPIView):
@@ -34,9 +36,8 @@ class LedOpAPIView(generics.UpdateAPIView):
         except ValidationError:
             username_number = int(self.request.user.username.split('-')[-1])
 
-            lower_bound = (username_number - 1) * 10
-            upper_bound = (username_number - 1) * 10 + 9
-
+            lower_bound, upper_bound = get_user_led_bounds(username_number)
+            # flash orange
             payload = '{}|{},255,0,128'.format(lower_bound, upper_bound)
 
             with DeviceController(self.request.user.username) as ctl:
@@ -62,5 +63,12 @@ class MotorOpAPIView(APIView):
         """
         with DeviceController(self.request.user.username) as ctl:
             ctl.send('motor', '')
+            for i in range(1, 10):
+                ctl.send('led', 'all,0,0,0')
+                time.sleep(0.5)
+                ctl.send('led', '0|49,0,255,0')
+                ctl.send('led', '50|99,255,0,211')
+                ctl.send('led', '100|149,255,0,0')
+                time.sleep(1)
 
         return Response({'action': 'ok'})
