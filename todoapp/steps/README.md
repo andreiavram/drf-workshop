@@ -54,14 +54,14 @@
       Add rest_framework and rest_framework.authtoken to INSTALLED_APPS
       Add REST_FRAMEWORK settings as follows
       ```python
-      REST_FRAMEWORK = {
-        'DEFAULT_PERMISSION_CLASSES': (
-           'rest_framework.permissions.IsAuthenticated',
-        ),
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework.authentication.TokenAuthentication',
-        )
-     }
+        REST_FRAMEWORK = {
+            'DEFAULT_PERMISSION_CLASSES': (
+               'rest_framework.permissions.IsAuthenticated',
+            ),
+            'DEFAULT_AUTHENTICATION_CLASSES': (
+                'rest_framework.authentication.TokenAuthentication',
+            )
+         }
      ```
 12. Board default user
     - At Board creation, add the user from request to the board to be created
