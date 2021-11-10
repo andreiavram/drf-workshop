@@ -10,15 +10,15 @@
 #define ACTION_PIN D5
 #define PRESS_TIME_MS 500
 
-const char ssid[] = "internet";
-const char pass[] = "mamaligacaacasa";
+const char ssid[] = "";
+const char pass[] = "";
 const char mqtt_client_id[] = "workshop";
 const char mqtt_user[] = "workshop";
-const char mqtt_pass[] = "VKlbYiIlutOsg5vjIKvbVA";
+const char mqtt_pass[] = "";
 
 #define BUZZ_PIN D2
 #define LED_PIN D7
-#define NUMPIXELS 150
+#define NUMPIXELS 300
 #define IN1 D1
 #define IN2 D6
 #define IN3 D5
